@@ -48,3 +48,25 @@
     MOBILE.addListener(onChange);
   }
 })();
+
+/* ---- Heading anchors: progressive enhancement, ids derived from text ---- */
+(function () {
+  "use strict";
+  var used = Object.create(null);
+  var heads = document.querySelectorAll("main h2, main h3");
+  for (var i = 0; i < heads.length; i++) {
+    var h = heads[i];
+    if (!h.textContent.trim()) continue;
+    var id = h.id || h.textContent.trim().toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").slice(0, 48);
+    if (!id) continue;
+    if (used[id]) { id = id + "-" + (++used[id]); } else { used[id] = 1; }
+    h.id = id;
+    var a = document.createElement("a");
+    a.className = "anchor";
+    a.href = "#" + id;
+    a.textContent = "#";
+    a.setAttribute("aria-label", "Link to this section");
+    h.appendChild(a);
+  }
+})();

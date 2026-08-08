@@ -504,3 +504,385 @@ button:focus-visible {
   .stat { border: 1pt solid #ccc; background: #fff; }
   .placeholder { display: none; }
 }
+
+/* =========================================================
+   UI POLISH PASS
+   50 improvements. All motion gated behind prefers-reduced-motion.
+   ========================================================= */
+
+/* ---- 1. Brand bar: thin accent rule at the very top ---- */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 45%, var(--bg)));
+  z-index: 60;
+}
+
+/* ---- 2. Reading progress, scroll-driven, no JavaScript ---- */
+@supports (animation-timeline: scroll()) {
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0 100% auto 0;
+    height: 3px;
+    background: var(--ink);
+    opacity: 0.55;
+    z-index: 61;
+    animation: readprogress linear both;
+    animation-timeline: scroll(root block);
+  }
+  @keyframes readprogress { to { inset-inline-end: 0; } }
+}
+
+/* ---- 3. Selection colour ---- */
+::selection { background: color-mix(in srgb, var(--accent) 26%, transparent); color: var(--ink); }
+
+/* ---- 4. Form and control accent ---- */
+:root { accent-color: var(--accent); caret-color: var(--accent); }
+
+/* ---- 5. Scrollbar ---- */
+* { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--ink-soft) 45%, transparent) transparent; }
+
+/* ---- 6. Tabular figures so the stat row aligns on a common baseline ---- */
+.stat .n, .entry .meta, .contact-list { font-variant-numeric: tabular-nums lining-nums; }
+
+/* ---- 7. Ligatures and contextual alternates in body copy ---- */
+body { font-variant-ligatures: common-ligatures contextual; }
+
+/* ---- 8. Hanging punctuation where supported ---- */
+p, li, blockquote { hanging-punctuation: first last; }
+
+/* ---- 9. Balance short headings, not just h1 ---- */
+h2, h3 { text-wrap: balance; }
+
+/* ---- 10. Hyphenate only on genuinely narrow screens ---- */
+@media (max-width: 26rem) { p, li { hyphens: auto; } }
+
+/* ---- 11. Tighter uppercase tracking, optically corrected ---- */
+h2 { letter-spacing: 0.11em; font-feature-settings: "case" 1; }
+.hero .eyebrow { font-feature-settings: "case" 1; }
+
+/* ---- 12. Lead paragraph directly after a section heading ---- */
+h2 + p { font-size: calc(var(--t-body) * 1.03); color: var(--ink); }
+
+/* ---- 13. Universal transition on interactive colour and transform ---- */
+a, .btn, .stat, .tags li, .burger, nav[aria-label="Primary"] a {
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease,
+              transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+/* ---- 14. Body link underlines: offset and weight, not browser default ---- */
+main a:not(.btn):not(.brand) {
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+main a:not(.btn):not(.brand):hover {
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--accent);
+}
+
+/* ---- 15. Nav link: underline grows from the centre on hover ---- */
+nav[aria-label="Primary"] a {
+  position: relative;
+  border-bottom: none;
+  padding-bottom: 0.125rem;
+}
+nav[aria-label="Primary"] a::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  right: 50%;
+  bottom: 0.375rem;
+  height: 2px;
+  background: var(--accent);
+  transition: left 0.18s ease, right 0.18s ease;
+}
+nav[aria-label="Primary"] a:hover::after { left: 0; right: 0; }
+nav[aria-label="Primary"] a.active { color: var(--ink); }
+nav[aria-label="Primary"] a.active::after { left: 0; right: 0; }
+
+/* ---- 16. Button press state ---- */
+.btn:active { transform: translateY(1px); }
+
+/* ---- 17. Button shadow, subtle, only on the primary ---- */
+.btn:not(.ghost) { box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 18%, transparent); }
+.btn:not(.ghost):hover { box-shadow: 0 3px 8px color-mix(in srgb, var(--ink) 22%, transparent); }
+.btn:not(.ghost):active { box-shadow: none; }
+
+/* ---- 18. Ghost button border tightens to accent on hover ---- */
+.btn.ghost:hover { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
+
+/* ---- 19. Stat cards lift on hover ---- */
+.stat:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--ink) 10%, transparent);
+}
+
+/* ---- 20. Stat label no longer wraps mid-phrase awkwardly ---- */
+.stat .l { text-wrap: balance; }
+
+/* ---- 21. Entry rail brightens on hover ---- */
+.entry { transition: border-color 0.2s ease; }
+.entry:hover { border-left-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
+
+/* ---- 22. Entry bullets in the accent colour ---- */
+.entry ul li::marker { color: color-mix(in srgb, var(--accent) 70%, transparent); }
+
+/* ---- 23. Tags read as labels, not dead links ---- */
+.tags li { border: 1px solid color-mix(in srgb, var(--accent) 18%, transparent); cursor: default; }
+.tags li:hover { background: color-mix(in srgb, var(--accent) 14%, var(--bg)); }
+
+/* ---- 24. Plain-list rows get a hover wash for scannability ---- */
+ul.plain li {
+  padding-inline: 0.5rem;
+  margin-inline: -0.5rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.15s ease;
+}
+ul.plain li:hover { background: color-mix(in srgb, var(--accent) 6%, transparent); }
+
+/* ---- 25. Evidence label as a pill ---- */
+.ev {
+  display: inline-block;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-radius: 0.25rem;
+  padding: 0.0625rem 0.375rem;
+  margin-right: 0.375rem;
+}
+
+/* ---- 26. Pull quote for standout statements ---- */
+.pull {
+  border-left: 3px solid var(--accent);
+  padding: 0.25rem 0 0.25rem 1.125rem;
+  margin: 1.75rem 0;
+  font-size: var(--t-lede);
+  color: var(--ink);
+  max-width: 60ch;
+}
+
+/* ---- 27. Heading anchor links, revealed on hover or focus ---- */
+.anchor {
+  margin-left: 0.5rem;
+  opacity: 0;
+  text-decoration: none;
+  color: var(--accent);
+  font-weight: 500;
+  transition: opacity 0.15s ease;
+}
+h2:hover .anchor, h3:hover .anchor, .anchor:focus-visible { opacity: 0.75; }
+@media (hover: none) { .anchor { display: none; } }
+
+/* ---- 28. Scroll margin so anchored headings clear the sticky header ---- */
+:target, h2[id], h3[id] { scroll-margin-top: 5rem; }
+
+/* ---- 29. Header gains a shadow only once the page is scrolled ---- */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    header.site {
+      animation: headershadow linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 6rem;
+    }
+    @keyframes headershadow {
+      to { box-shadow: 0 1px 12px color-mix(in srgb, var(--ink) 14%, transparent); }
+    }
+  }
+}
+
+/* ---- 30. Sections fade and rise into view, scroll-driven ---- */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    main section {
+      animation: sectionin linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 18%;
+    }
+    @keyframes sectionin {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: none; }
+    }
+  }
+}
+
+/* ---- 31. Cross-page view transitions ---- */
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) { animation: none !important; }
+}
+
+/* ---- 32. Hero monogram, a quiet visual anchor ---- */
+.hero .wrap { position: relative; }
+.hero-mark {
+  position: absolute;
+  right: var(--gutter);
+  top: -0.25rem;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 0.875rem;
+  background: var(--accent);
+  color: var(--bg);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  user-select: none;
+}
+@media (min-width: 45rem) { .hero-mark { display: inline-flex; } }
+
+/* ---- 33. Section spacing tightens when a heading is followed by a list ---- */
+section:has(> h2 + ul) h2 { margin-bottom: 1.125rem; }
+
+/* ---- 34. Entries containing a nested list get a touch more breathing room ---- */
+.entry:has(ul) { padding-bottom: 0.25rem; }
+
+/* ---- 35. Keep the brand and nav on one line on desktop ---- */
+@media (min-width: 52rem) {
+  .nav-inner { flex-wrap: nowrap; }
+  nav[aria-label="Primary"] { flex-wrap: nowrap; }
+}
+
+/* ---- 36. Focus ring animates rather than snapping ---- */
+a, button { outline-offset: 3px; transition-property: color, background-color, border-color, transform, box-shadow, opacity, outline-color; }
+
+/* ---- 37. Card and row focus visibility for keyboard users ---- */
+.stat:focus-within, ul.plain li:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 0.375rem;
+}
+
+/* ---- 38. Pager: previous and next page at the foot of each page ---- */
+.pager {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  padding-block: 1.75rem 0;
+  border-top: 1px solid var(--line);
+  margin-top: var(--sp-section);
+}
+.pager a {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  text-decoration: none;
+  min-height: var(--tap);
+  justify-content: center;
+  max-width: 48%;
+}
+.pager a:last-child { text-align: right; align-items: flex-end; }
+.pager .dir {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+  font-weight: 650;
+}
+.pager .lbl { color: var(--accent); font-weight: 600; font-size: 0.9375rem; }
+.pager a:hover .lbl { text-decoration: underline; text-underline-offset: 0.18em; }
+
+/* ---- 39. Footer becomes structured rather than a single line ---- */
+.foot-grid {
+  display: flex;
+  gap: 1rem 2rem;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.foot-nav { display: flex; gap: 0.25rem 1.125rem; flex-wrap: wrap; }
+.foot-nav a {
+  color: var(--ink-soft);
+  text-decoration: none;
+  font-size: 0.875rem;
+  min-height: var(--tap);
+  display: inline-flex;
+  align-items: center;
+}
+.foot-nav a:hover { color: var(--accent); }
+.foot-meta { font-size: 0.8125rem; color: var(--ink-soft); }
+
+/* ---- 40. Back to top ---- */
+.totop {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: var(--tap);
+  font-size: 0.875rem;
+  text-decoration: none;
+  color: var(--ink-soft);
+}
+.totop:hover { color: var(--accent); }
+
+/* ---- 41. Dark mode surface separation, cards no longer float on identical black ---- */
+@media (prefers-color-scheme: dark) {
+  .stat { background: #17222f; border-color: #2a394a; }
+  .stat:hover { background: #1b2836; }
+  body::after { background: var(--accent); opacity: 0.8; }
+  .btn:not(.ghost) { box-shadow: none; }
+  .btn:not(.ghost):hover { box-shadow: 0 3px 12px color-mix(in srgb, var(--accent) 30%, transparent); }
+}
+
+/* ---- 42. Light mode card edge refinement ---- */
+@media (prefers-color-scheme: light) {
+  .stat { box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 5%, transparent); }
+}
+
+/* ---- 43. Contact rows align on a grid at wider widths ---- */
+@media (min-width: 34rem) {
+  .contact-list li { align-items: baseline; }
+  .contact-list .k {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 650;
+  }
+}
+
+/* ---- 44. Skip link matches the rest of the design language ---- */
+.skip { box-shadow: 0 2px 10px color-mix(in srgb, var(--ink) 30%, transparent); font-weight: 600; }
+
+/* ---- 45. Burger gets a hover and press state ---- */
+.burger:hover { border-color: color-mix(in srgb, var(--accent) 50%, var(--line)); color: var(--accent); }
+.burger:active { transform: scale(0.94); }
+
+/* ---- 46. Mobile menu rows highlight on press ---- */
+@media (max-width: 51.9375rem) {
+  .js nav[aria-label="Primary"] a:active { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+}
+
+/* ---- 47. Reserve space for the portrait so adding it causes no layout shift ---- */
+.portrait {
+  aspect-ratio: 1;
+  width: clamp(5rem, 18vw, 7.5rem);
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--line);
+}
+
+/* ---- 48. Prevent long unbroken strings from breaking the layout ---- */
+.entry .meta, .contact-list a, code { word-break: break-word; }
+
+/* ---- 49. Print: keep card edges and drop interactive chrome ---- */
+@media print {
+  body::before, body::after, .pager, .foot-nav, .totop, .anchor, .hero-mark { display: none !important; }
+  .stat { print-color-adjust: exact; -webkit-print-color-adjust: exact; box-shadow: none; }
+  main section { animation: none !important; opacity: 1 !important; transform: none !important; }
+}
+
+/* ---- 50. Honour reduced motion across everything added above ---- */
+@media (prefers-reduced-motion: reduce) {
+  main section { animation: none !important; opacity: 1 !important; transform: none !important; }
+  body::after { animation: none !important; display: none; }
+  header.site { animation: none !important; }
+  .stat:hover, .btn:active, .burger:active { transform: none !important; }
+  nav[aria-label="Primary"] a::after { transition: none !important; }
+}
