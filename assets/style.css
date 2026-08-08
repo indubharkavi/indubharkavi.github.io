@@ -667,12 +667,18 @@ ul.plain li:hover { background: color-mix(in srgb, var(--accent) 6%, transparent
 
 /* ---- 27. Heading anchor links, revealed on hover or focus ---- */
 .anchor {
-  margin-left: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  min-height: 1.5rem;
+  margin-left: 0.25rem;
   opacity: 0;
   text-decoration: none;
   color: var(--accent);
   font-weight: 500;
   transition: opacity 0.15s ease;
+  vertical-align: middle;
 }
 h2:hover .anchor, h3:hover .anchor, .anchor:focus-visible { opacity: 0.75; }
 @media (hover: none) { .anchor { display: none; } }
@@ -885,4 +891,11 @@ a, button { outline-offset: 3px; transition-property: color, background-color, b
   header.site { animation: none !important; }
   .stat:hover, .btn:active, .burger:active { transform: none !important; }
   nav[aria-label="Primary"] a::after { transition: none !important; }
+}
+
+/* ---- Hit-area top-up: inline links in the footer meta line ---- */
+.foot-meta a {
+  display: inline-block;
+  min-height: 1.5rem;
+  line-height: 1.5rem;
 }
