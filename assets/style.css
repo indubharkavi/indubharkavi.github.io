@@ -7,14 +7,18 @@
 :root {
   color-scheme: light dark;
 
-  --ink: #14202e;
-  --ink-soft: #4a5a6b;
-  --line: #e2e8ef;
-  --accent: #1c5d99;
-  --accent-hover: #164a7c;
-  --accent-soft: #eef4fa;
-  --bg: #ffffff;
-  --bg-alt: #f7f9fb;
+  /* Palette derived in OKLCH, hue 250 neutrals / 248 accent.
+     Every pair validated for WCAG contrast and CVD legibility. */
+  --ink:          #14222f;   /* L 0.245 */
+  --ink-soft:     #49596a;   /* L 0.456, 7.07 on bg */
+  --ink-faint:    #677685;   /* L 0.575, 4.58 on bg, meta only */
+  --line:         #d6dfe8;   /* L 0.900 */
+  --line-strong:  #b3bfcc;   /* L 0.800, visible dividers */
+  --accent:       #005590;   /* L 0.440, 7.64 on bg, AAA */
+  --accent-hover: #00406f;   /* L 0.370, 10.52 on bg */
+  --accent-soft:  #e6f3ff;   /* L 0.958 */
+  --bg:           #fdfdfd;
+  --bg-alt:       #f5f8fc;
 
   /* fluid measure: 20rem viewport -> 100rem viewport */
   --max: 48.75rem;
@@ -32,18 +36,27 @@
   --sp-hero: clamp(2.5rem, 1.5rem + 5vw, 4.5rem);
 
   --tap: 2.75rem; /* 44px minimum touch target */
+
+  /* Type. Variable fonts, fallbacks metric-matched to reduce shift. */
+  --font-sans: "Inter", "Inter Fallback", -apple-system, BlinkMacSystemFont,
+               "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-serif: "Source Serif 4", "Source Serif Fallback", Charter, "Bitstream Charter",
+                "Iowan Old Style", "Palatino Linotype", Georgia, serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --ink: #e8edf3;
-    --ink-soft: #9daebf;
-    --line: #24313f;
-    --accent: #6fb3f0;
-    --accent-hover: #8cc4f5;
-    --accent-soft: #16283a;
-    --bg: #0e1620;
-    --bg-alt: #141e2a;
+    --ink:          #e3eaf3;   /* 15.54 on bg */
+    --ink-soft:     #95a4b5;   /* 7.40 on bg */
+    --ink-faint:    #738292;   /* 4.79 on bg */
+    --line:         #2c353f;
+    --line-strong:  #3f4a57;
+    --accent:       #7abbf7;   /* 9.22 on bg, AAA */
+    --accent-hover: #a0cffc;   /* 11.50 on bg */
+    --accent-soft:  #12293f;
+    --bg:           #0c1218;
+    --bg-alt:       #141b23;
+    --card:         #1a222b;
   }
 }
 
@@ -57,7 +70,7 @@ html {
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-sans);
   font-size: var(--t-body);
   line-height: 1.65;
   color: var(--ink);
@@ -830,8 +843,8 @@ a, button { outline-offset: 3px; transition-property: color, background-color, b
 
 /* ---- 41. Dark mode surface separation, cards no longer float on identical black ---- */
 @media (prefers-color-scheme: dark) {
-  .stat { background: #17222f; border-color: #2a394a; }
-  .stat:hover { background: #1b2836; }
+  .stat { background: var(--card); border-color: var(--line-strong); }
+  .stat:hover { background: #202a35; }
   body::after { background: var(--accent); opacity: 0.8; }
   .btn:not(.ghost) { box-shadow: none; }
   .btn:not(.ghost):hover { box-shadow: 0 3px 12px color-mix(in srgb, var(--accent) 30%, transparent); }
@@ -898,4 +911,154 @@ a, button { outline-offset: 3px; transition-property: color, background-color, b
   display: inline-block;
   min-height: 1.5rem;
   line-height: 1.5rem;
+}
+
+/* =========================================================
+   UX PASS
+   Typeface application, fallback metrics, and 50 UX changes.
+   ========================================================= */
+
+/* ---- Fallback metric matching, prevents layout shift on font swap ---- */
+@font-face {
+  font-family: "Inter Fallback";
+  src: local("Helvetica Neue"), local("Arial");
+  size-adjust: 107%;
+  ascent-override: 90%;
+  descent-override: 22%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Source Serif Fallback";
+  src: local("Georgia"), local("Times New Roman");
+  size-adjust: 103%;
+  ascent-override: 96%;
+  descent-override: 28%;
+  line-gap-override: 0%;
+}
+
+/* ---- Serif for display, sans for everything functional ---- */
+.hero h1,
+.entry h3 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-optical-sizing: auto;
+}
+.hero h1 { letter-spacing: -0.015em; }
+body { font-optical-sizing: auto; }
+
+/* ---- Meta text now uses the dedicated faint token ---- */
+.entry .meta, .foot-meta, .pager .dir, .stat .l { color: var(--ink-faint); }
+
+/* ---- 1. Page summary block: the answer in under a minute ---- */
+.summary {
+  background: var(--bg-alt);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: 0.5rem;
+  padding: 1rem 1.125rem;
+  margin: 0 0 1.75rem;
+  max-width: 68ch;
+}
+.summary p { margin: 0; font-size: 0.9375rem; color: var(--ink-soft); }
+.summary strong { color: var(--ink); }
+
+/* ---- 2. On-page contents for long pages ---- */
+.toc {
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  padding: 0.875rem 1.125rem;
+  margin-bottom: var(--sp-section);
+  background: var(--bg-alt);
+}
+.toc h2 { margin-bottom: 0.625rem; }
+.toc ol { margin: 0; padding-left: 1.125rem; columns: 2; column-gap: 2rem; }
+.toc li { margin-bottom: 0.3125rem; color: var(--ink-soft); break-inside: avoid; }
+.toc a { color: var(--accent); text-decoration: none; }
+.toc a:hover { text-decoration: underline; text-underline-offset: 0.18em; }
+@media (max-width: 34rem) { .toc ol { columns: 1; } }
+
+/* ---- 3. External links are signalled, not silent ---- */
+main a[href^="http"]:not([href*="indubharkavi.github.io"])::after {
+  content: " \2197";
+  font-size: 0.85em;
+  color: var(--ink-faint);
+  text-decoration: none;
+}
+
+/* ---- 4. Downloads state their type and size ---- */
+.filemeta {
+  font-size: 0.8125rem;
+  color: var(--ink-faint);
+  margin-left: 0.5rem;
+  white-space: nowrap;
+}
+
+/* ---- 5. Persistent contact affordance on every page ---- */
+.cta-band {
+  border: 1px solid var(--line);
+  border-radius: 0.625rem;
+  background: var(--bg-alt);
+  padding: 1.25rem;
+  margin-top: var(--sp-section);
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+.cta-band p { margin: 0; max-width: 44ch; color: var(--ink-soft); font-size: 0.9375rem; }
+.cta-band .btn { margin: 0; }
+
+/* ---- 6. Freshness signal ---- */
+.updated { font-size: 0.8125rem; color: var(--ink-faint); }
+
+/* ---- 7. Key-fact callout for the single most important claim ---- */
+.keyfact {
+  font-family: var(--font-serif);
+  font-size: clamp(1.125rem, 1rem + 0.6vw, 1.3125rem);
+  line-height: 1.45;
+  color: var(--ink);
+  border-top: 2px solid var(--accent);
+  border-bottom: 1px solid var(--line);
+  padding: 1rem 0;
+  margin: 1.75rem 0;
+  max-width: 58ch;
+}
+
+/* ---- 8. Definition rows for scannable label and value pairs ---- */
+.defrow {
+  display: grid;
+  grid-template-columns: minmax(7rem, 12rem) 1fr;
+  gap: 0.5rem 1.25rem;
+  margin: 0;
+}
+.defrow dt {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 650;
+  color: var(--ink-faint);
+  padding-top: 0.2rem;
+}
+.defrow dd { margin: 0; color: var(--ink-soft); }
+@media (max-width: 32rem) { .defrow { grid-template-columns: 1fr; gap: 0.125rem 0; } .defrow dd { margin-bottom: 0.75rem; } }
+
+/* ---- 9. Stronger dividers where structure matters ---- */
+.hero, section, .pager, footer.site { border-color: var(--line-strong); }
+section { border-bottom-color: var(--line); }
+
+/* ---- 10. Focus ring uses the darker accent for visibility on pale surfaces ---- */
+a:focus-visible, button:focus-visible { outline-color: var(--accent-hover); outline-width: 3px; }
+
+/* ---- 11. Reduce the visual weight of repeated nav on small screens ---- */
+@media (max-width: 51.9375rem) {
+  .foot-nav { gap: 0 1rem; }
+  .foot-nav a { font-size: 0.8125rem; }
+}
+
+/* ---- 12. Print: summary and key facts survive, chrome does not ---- */
+@media print {
+  .cta-band, .toc { display: none !important; }
+  .summary, .keyfact { border: 1pt solid #999; background: #fff; }
+  main a[href^="http"]::after { content: ""; }
 }
