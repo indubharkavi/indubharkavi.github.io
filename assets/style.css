@@ -538,15 +538,18 @@ body::before {
   body::after {
     content: "";
     position: fixed;
-    inset: 0 100% auto 0;
+    inset: 0 0 auto 0;
     height: 3px;
-    background: var(--ink);
-    opacity: 0.55;
+    background: var(--accent);
+    opacity: 0.7;
     z-index: 61;
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    will-change: transform;
     animation: readprogress linear both;
     animation-timeline: scroll(root block);
   }
-  @keyframes readprogress { to { inset-inline-end: 0; } }
+  @keyframes readprogress { to { transform: scaleX(1); } }
 }
 
 /* ---- 3. Selection colour ---- */
@@ -714,19 +717,7 @@ h2:hover .anchor, h3:hover .anchor, .anchor:focus-visible { opacity: 0.75; }
 }
 
 /* ---- 30. Sections fade and rise into view, scroll-driven ---- */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    main section {
-      animation: sectionin linear both;
-      animation-timeline: view();
-      animation-range: entry 0% cover 18%;
-    }
-    @keyframes sectionin {
-      from { opacity: 0; transform: translateY(14px); }
-      to   { opacity: 1; transform: none; }
-    }
-  }
-}
+/* superseded by the scroll transition pass below */
 
 /* ---- 31. Cross-page view transitions ---- */
 @view-transition { navigation: auto; }
@@ -1061,4 +1052,211 @@ a:focus-visible, button:focus-visible { outline-color: var(--accent-hover); outl
   .cta-band, .toc { display: none !important; }
   .summary, .keyfact { border: 1pt solid #999; background: #fff; }
   main a[href^="http"]::after { content: ""; }
+}
+
+/* =========================================================
+   CRITICAL AUDIT FIXES
+   ========================================================= */
+
+/* ---- 4. Brand must never wrap ---- */
+.brand { white-space: nowrap; flex: 0 0 auto; }
+
+/* ---- 5. Nav labels must never wrap mid-word ---- */
+nav[aria-label="Primary"] a { white-space: nowrap; }
+
+/* ---- 6. Resume reads as an action, not another page ---- */
+nav[aria-label="Primary"] a[download] {
+  border: 1px solid var(--line-strong);
+  border-radius: 0.375rem;
+  padding-inline: 0.625rem;
+  color: var(--ink);
+  margin-left: 0.25rem;
+}
+nav[aria-label="Primary"] a[download]:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+nav[aria-label="Primary"] a[download]::after { display: none; }
+
+/* ---- 8. Hero rhythm tightened, the gap under the buttons was doing nothing ---- */
+.hero { padding-block: var(--sp-hero) calc(var(--sp-hero) * 0.45); }
+.hero p.lede { margin-bottom: 1.5rem; }
+.hero .btn { margin-bottom: 0; }
+
+/* ---- 2. Orientation block: the first thing a visitor reads after the hero ---- */
+.defrow.orient {
+  padding-block: clamp(1.5rem, 3vw, 2rem);
+  border-bottom: 1px solid var(--line);
+  row-gap: 0.875rem;
+}
+.defrow.orient dd { color: var(--ink); max-width: 60ch; }
+
+/* ---- 9. Stat numbers were shouting, brought back into the group ---- */
+.stat .n { font-size: clamp(1.375rem, 1.15rem + 1vw, 1.5rem); }
+.stat { padding: clamp(0.75rem, 2.5vw, 1rem) clamp(0.875rem, 2.5vw, 1.125rem); }
+
+/* ---- 10. Hero monogram aligned to the eyebrow, not floating above it ---- */
+.hero-mark {
+  top: 0.125rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.625rem;
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+/* ---- 11. Reading signal ---- */
+.readmeta {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+  color: var(--ink-faint);
+  font-size: 0.75rem;
+  margin-left: 0.5rem;
+}
+
+/* ---- 14. Anchor targets clear the header at every breakpoint ---- */
+:target, h2[id], h3[id] { scroll-margin-top: 6.5rem; }
+@media (min-width: 52rem) { :target, h2[id], h3[id] { scroll-margin-top: 5rem; } }
+
+/* ---- 15. Nav breathing room recovered by allowing the row to shrink ---- */
+@media (min-width: 52rem) {
+  nav[aria-label="Primary"] { gap: 0 1.125rem; flex: 0 1 auto; }
+}
+
+/* ---- Print: the orientation block is the most useful part on paper ---- */
+@media print {
+  .defrow.orient { border-bottom: 1pt solid #999; }
+  .readmeta { display: none; }
+}
+
+/* =========================================================
+   SCROLL TRANSITIONS
+   All effects are transform and opacity only, so they run on the
+   compositor. Every one is inside a prefers-reduced-motion: no-preference
+   guard and an @supports check, so the page is complete without them.
+   ========================================================= */
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+
+    /* ---- Sections rise as they enter, then dim slightly as they leave,
+           so the eye stays with whichever section is central ---- */
+    @keyframes sectionEnter {
+      from { opacity: 0; transform: translateY(1.25rem); }
+      to   { opacity: 1; transform: none; }
+    }
+    main section {
+      animation: sectionEnter linear both, sectionExit linear both;
+      animation-timeline: view(), view();
+      animation-range: entry 0% entry 65%, exit 35% exit 100%;
+    }
+    @keyframes sectionExit {
+      from { opacity: 1; }
+      to   { opacity: 0.55; }
+    }
+
+    /* ---- Hero settles on first paint, no scroll needed ---- */
+    .hero .eyebrow, .hero h1, .hero p.lede, .hero .btn {
+      animation: heroIn 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+    }
+    .hero h1      { animation-delay: 0.06s; }
+    .hero p.lede  { animation-delay: 0.12s; }
+    .hero .btn    { animation-delay: 0.18s; }
+    @keyframes heroIn {
+      from { opacity: 0; transform: translateY(0.75rem); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* ---- Stat cards deal in, staggered by position ---- */
+    .stat {
+      animation: cardIn linear both;
+      animation-timeline: view();
+      animation-range: entry 5% entry 55%;
+    }
+    .stat:nth-child(2) { animation-range: entry 8% entry 58%; }
+    .stat:nth-child(3) { animation-range: entry 11% entry 61%; }
+    .stat:nth-child(4) { animation-range: entry 14% entry 64%; }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(0.875rem) scale(0.985); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* ---- Entry rail draws itself down as the entry arrives ---- */
+    .entry {
+      animation: railDraw linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 50%;
+    }
+    @keyframes railDraw {
+      from { opacity: 0.35; clip-path: inset(0 0 100% 0); }
+      to   { opacity: 1; clip-path: inset(0 0 0 0); }
+    }
+
+    /* ---- Orientation rows arrive in sequence ---- */
+    .defrow.orient dt, .defrow.orient dd {
+      animation: rowIn linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 45%;
+    }
+    @keyframes rowIn {
+      from { opacity: 0; transform: translateX(-0.5rem); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* ---- Hero monogram drifts gently against the scroll ---- */
+    .hero-mark {
+      animation: markDrift linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 24rem;
+    }
+    @keyframes markDrift {
+      to { transform: translateY(1.25rem) rotate(-3deg); opacity: 0.55; }
+    }
+
+    /* ---- Section headings track in slightly ahead of their content ---- */
+    main section > h2 {
+      animation: headIn linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+    @keyframes headIn {
+      from { opacity: 0; letter-spacing: 0.18em; }
+      to   { opacity: 1; letter-spacing: 0.11em; }
+    }
+  }
+}
+
+/* ---- Cross-page transition, direction-aware and brief ---- */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root) { animation: vtOut 0.18s ease both; }
+  ::view-transition-new(root) { animation: vtIn 0.24s ease both; }
+  @keyframes vtOut { to { opacity: 0; transform: translateY(-0.5rem); } }
+  @keyframes vtIn { from { opacity: 0; transform: translateY(0.75rem); } }
+}
+
+/* ---- Belt and braces: nothing above survives a reduced-motion request ---- */
+@media (prefers-reduced-motion: reduce) {
+  main section, .stat, .entry, .hero-mark,
+  .defrow.orient dt, .defrow.orient dd,
+  main section > h2, .hero .eyebrow, .hero h1, .hero p.lede, .hero .btn {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none !important; }
+}
+
+/* ---- Print must never inherit a mid-animation state ---- */
+@media print {
+  main section, .stat, .entry, .hero-mark,
+  .defrow.orient dt, .defrow.orient dd, main section > h2,
+  .hero .eyebrow, .hero h1, .hero p.lede {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
 }
